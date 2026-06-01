@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thessaloniki Explorer Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Playfair+Display:ital,wght@0,700;1,700&display=swap');
+        
+        :root {
+            --color-bg: #fdfaf6;
+            --color-accent: #d4a373;
+            --color-secondary: #ccd5ae;
+            --color-text: #333d29;
+            --color-blue: #a3c4f3;
+        }
+
+        body { 
+            font-family: 'Montserrat', sans-serif; 
+            background-color: var(--color-bg); 
+            color: var(--color-text);
+            scroll-behavior: smooth;
+        }
+
+        h1, h2, h3 { font-family: 'Playfair Display', serif; }
+
+        .chart-container { 
+            position: relative; 
+            width: 100%; 
+            max-width: 650px; 
+            margin-left: auto; 
+            margin-right: auto; 
+            height: 300px; 
+            max-height: 400px; 
+        }
+
+        .card {
+            background: white;
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover { transform: translateY(-8px); box-shadow: 0 20px 30px -10px rgba(0, 0, 0, 0.1); }
+
+        .step-active { background-color: var(--color-accent); color: white; }
+    </style>
+</head>
+<body class="antialiased">
+
+<!-- Chosen Palette: Sand & Sea (Warme Neutralkoloration mit mediterranen Akzenten) -->
+<!-- Application Structure Plan: 
+    Das Dashboard ist als strategisches Planungs-Tool konzipiert.
+    - Hero: Emotionaler Einstieg in das "Feeling" der Stadt.
+    - Interaktiver Tages-Navigator: Schneller Zugriff auf die Kern-Highlights.
+    - Belastungs-Matrix: Visualisierung von Laufleistung und Aktivitätstypen (Kultur vs. Relax).
+    - Deep-Dive Kulinarik: Gegenüberstellung von lokalen Schätzen und Touristenfallen.
+    Diese Struktur hilft dem Nutzer, die Reise nicht nur als Text, sondern als rhythmisches Erlebnis (Anstrengung/Erholung) zu begreifen.
+-->
+<!-- Visualization & Content Choices: 
+    - Distanz-Check -> Bar Chart (Geh-Intensität pro Tag).
+    - Balance-Rad -> Doughnut Chart (Verteilung der Zeit).
+    - Kulinarik-Präferenz -> Bar Chart (Ranking der Spezialitäten).
+    - KEIN SVG verwendet. KEIN Mermaid JS verwendet. Alle Grafiken via Canvas/Chart.js.
+-->
+
+<nav class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-100 py-4 px-6">
+    <div class="max-w-6xl mx-auto flex justify-between items-center">
+        <span class="text-2xl font-bold text-[#d4a373] italic">Thessaloniki '25</span>
+        <div class="hidden md:flex space-x-8 font-semibold text-xs uppercase tracking-widest">
+            <a href="#route" class="hover:text-[#d4a373] transition">Der Plan</a>
+            <a href="#metrics" class="hover:text-[#d4a373] transition">Metriken</a>
+            <a href="#secrets" class="hover:text-[#d4a373] transition">Secrets</a>
+            <a href="#culinary" class="hover:text-[#d4a373] transition">Genuss</a>
+        </div>
+    </div>
+</nav>
+
+<header class="py-24 px-6 text-center">
+    <div class="max-w-3xl mx-auto">
+        <h1 class="text-6xl md:text-8xl font-bold text-gray-800 mb-8 leading-tight">Vier Tage, <br><span class="text-[#d4a373]">Tausend Jahre.</span></h1>
+        <p class="text-xl text-gray-600 font-light leading-relaxed mb-10">
+            Vom Rauschen des Thermäischen Golfs bis zum Echo byzantinischer Mauern – euer interaktiver Leitfaden durch die verborgenen Gassen von Thessaloniki.
+        </p>
+        <div class="flex justify-center space-x-4">
+            <span class="bg-[#ccd5ae] text-white px-4 py-2 rounded-full text-xs font-bold uppercase">4. - 8. Juni</span>
+            <span class="bg-[#a3c4f3] text-white px-4 py-2 rounded-full text-xs font-bold uppercase">Zu Fuss & Per Boot</span>
+        </div>
+    </div>
+</header>
+
+<main class="max-w-6xl mx-auto px-6 pb-32">
+
+    <!-- Section: Interaktiver Plan -->
+    <section id="route" class="mb-32">
+        <div class="text-center mb-16">
+            <h2 class="text-4xl font-bold mb-4">Eure Etappen</h2>
+            <p class="text-gray-500 italic">Klickt auf die Tage, um die Kern-Erlebnisse zu sehen.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div class="card p-8 border-l-8 border-[#a3c4f3]">
+                <span class="text-sm font-bold text-[#a3c4f3]">Mittwoch</span>
+                <h3 class="text-2xl font-bold mt-2 mb-4">Ankommen</h3>
+                <p class="text-sm text-gray-600 mb-6">Uferpromenade, Regenschirme & der erste Meze in Ladadika. Sanfter Start am Meer.</p>
+                <ul class="text-xs space-y-2 text-gray-500">
+                    <li>• Weißer Turm</li>
+                    <li>• Nea Paralia Walk</li>
+                    <li>• Ladadika Dining</li>
+                </ul>
+            </div>
+            <div class="card p-8 border-l-8 border-[#d4a373]">
+                <span class="text-sm font-bold text-[#d4a373]">Donnerstag</span>
+                <h3 class="text-2xl font-bold mt-2 mb-4">Die Höhe</h3>
+                <p class="text-sm text-gray-600 mb-6">Aufstieg in die Ano Poli. Byzantinische Mauern, Kloster Vlatadon & Pasha's Gardens.</p>
+                <ul class="text-xs space-y-2 text-gray-500">
+                    <li>• Heptapyrgion Festung</li>
+                    <li>• Tsinari Taverne</li>
+                    <li>• Rotunda & Triumphbogen</li>
+                </ul>
+            </div>
+            <div class="card p-8 border-l-8 border-[#ccd5ae]">
+                <span class="text-sm font-bold text-[#ccd5ae]">Freitag</span>
+                <h3 class="text-2xl font-bold mt-2 mb-4">Das Blau</h3>
+                <p class="text-sm text-gray-600 mb-6">Wassertaxi nach Peraia. Ein ganzer Tag Sand, Meeresfrüchte und Entspannung pur.</p>
+                <ul class="text-xs space-y-2 text-gray-500">
+                    <li>• Bootsfahrt (Konstantis)</li>
+                    <li>• Neoi Epivates Beach</li>
+                    <li>• Milos Seafood</li>
+                </ul>
+            </div>
+            <div class="card p-8 border-l-8 border-gray-200">
+                <span class="text-sm font-bold text-gray-400">Samstag</span>
+                <h3 class="text-2xl font-bold mt-2 mb-4">Die Seele</h3>
+                <p class="text-sm text-gray-600 mb-6">Märkte Kapani & Modiano. Jüdisches Erbe und der perfekte Abschieds-Rooftop.</p>
+                <ul class="text-xs space-y-2 text-gray-500">
+                    <li>• Bougatsa Bantis</li>
+                    <li>• Markttrubel</li>
+                    <li>• Sebriko Kooperative</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section: Daten-Einblicke -->
+    <section id="metrics" class="mb-32 bg-white rounded-[3rem] p-12 shadow-sm border border-gray-50">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
+            <div>
+                <h2 class="text-4xl font-bold mb-6">Geh-Intensität & Balance</h2>
+                <p class="text-gray-600 mb-8 leading-relaxed">
+                    Der Plan ist so strukturiert, dass sich Belastung und Erholung abwechseln. Tag 2 fordert eure Kondition, während Tag 3 zur vollständigen Regeneration dient.
+                </p>
+                <div class="space-y-6">
+                    <div class="p-4 bg-orange-50 rounded-xl border-l-4 border-orange-200">
+                        <p class="text-sm font-bold text-orange-800">Tipp für Tag 2:</p>
+                        <p class="text-xs text-orange-700">Wählt bequeme Sneaker mit Grip. Das Kopfsteinpflaster in der Oberstadt kann rutschig sein.</p>
+                    </div>
+                    <div class="p-4 bg-blue-50 rounded-xl border-l-4 border-blue-200">
+                        <p class="text-sm font-bold text-blue-800">Tipp für Tag 3:</p>
+                        <p class="text-xs text-blue-700">Das Boot legt pünktlich ab. Kauft Tickets direkt an Bord – Barzahlung bevorzugt.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="space-y-12">
+                <div>
+                    <h4 class="text-center font-bold text-sm mb-4 uppercase tracking-widest">Laufleistung pro Tag (km)</h4>
+                    <div class="chart-container">
+                        <canvas id="walkChart"></canvas>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="text-center font-bold text-sm mb-4 uppercase tracking-widest">Zeitverteilung (Gesamt)</h4>
+                    <div class="chart-container">
+                        <canvas id="timeChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section: Hidden Spots -->
+    <section id="secrets" class="mb-32">
+        <div class="flex flex-col items-center text-center mb-16">
+            <h2 class="text-4xl font-bold mb-4">Abseits der Pfade</h2>
+            <div class="h-1 w-20 bg-[#d4a373] mb-6"></div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
+            <div class="text-center px-4">
+                <div class="w-16 h-16 bg-[#ccd5ae]/20 rounded-full flex items-center justify-center mx-auto mb-6 text-2xl">🌿</div>
+                <h3 class="text-xl font-bold mb-3">Pasha's Gardens</h3>
+                <p class="text-sm text-gray-500 italic">"Die Ruinen der Stille. Ein Ort, an dem man das Treiben der Stadt unter sich vergisst."</p>
+            </div>
+            <div class="text-center px-4">
+                <div class="w-16 h-16 bg-[#a3c4f3]/20 rounded-full flex items-center justify-center mx-auto mb-6 text-2xl">⛪</div>
+                <h3 class="text-xl font-bold mb-3">Kloster Vlatadon</h3>
+                <p class="text-sm text-gray-500 italic">"Byzantinische Mystik und Pfaue, die durch den Garten spazieren. Ein Fenster in die Ewigkeit."</p>
+            </div>
+            <div class="text-center px-4">
+                <div class="w-16 h-16 bg-[#faedcd]/20 rounded-full flex items-center justify-center mx-auto mb-6 text-2xl">🏛️</div>
+                <h3 class="text-xl font-bold mb-3">Die Krypta</h3>
+                <p class="text-sm text-gray-500 italic">"Unter der Agios Dimitrios Kirche wartet ein Labyrinth der Geschichte auf eure Entdeckung."</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section: Food Guide -->
+    <section id="culinary" class="mb-32">
+        <div class="bg-[#333d29] text-white rounded-[4rem] overflow-hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-2">
+                <div class="p-16">
+                    <h2 class="text-4xl font-bold mb-8">Kulinarischer Kompass</h2>
+                    <p class="text-gray-300 mb-12">In Thessaloniki wird das Essen nicht nur konsumiert, es wird gefeiert. Hier sind eure strategischen Ankerpunkte.</p>
+                    
+                    <div class="chart-container">
+                        <canvas id="foodChart"></canvas>
+                    </div>
+                </div>
+                <div class="bg-white/5 p-16 flex flex-col justify-center border-l border-white/10">
+                    <h3 class="text-2xl font-bold mb-8 text-[#d4a373] italic">No-Go Area: Touristenfallen</h3>
+                    <ul class="space-y-8">
+                        <li class="flex items-start">
+                            <span class="text-red-400 mr-4 font-bold text-xl">✕</span>
+                            <div>
+                                <h4 class="font-bold">Die Uferpromenade (Nikis)</h4>
+                                <p class="text-xs text-gray-400">Toller Ausblick für einen Drink, aber meidet das Essen. Zu teuer für zu wenig Qualität.</p>
+                            </div>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-red-400 mr-4 font-bold text-xl">✕</span>
+                            <div>
+                                <h4 class="font-bold">Aggressive Promoter</h4>
+                                <p class="text-xs text-gray-400">Wenn euch jemand in Ladadika auf der Straße anspricht: Ignorieren. Die besten Tavernen haben das nicht nötig.</p>
+                            </div>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-red-400 mr-4 font-bold text-xl">✕</span>
+                            <div>
+                                <h4 class="font-bold">Frühstücksketten</h4>
+                                <p class="text-xs text-gray-400">Geht für eure Bougatsa nicht zu den großen Bäckereien am Aristoteles-Platz. Geht zu Bantis.</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+</main>
+
+<footer class="bg-white py-20 px-6 border-t border-gray-100 text-center">
+    <p class="text-gray-400 text-sm mb-4 italic">„Thessaloniki ist keine Stadt, es ist ein Gefühl.“</p>
+    <p class="text-xs font-bold uppercase tracking-widest text-[#d4a373]">Kalo Taxidi – Gute Reise!</p>
+</footer>
+
+<script>
+    // Konfigurationen für Chart.js
+    const commonOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                display: true,
+                position: 'bottom',
+                labels: { boxWidth: 10, font: { family: 'Montserrat', size: 10 } }
+            }
+        }
+    };
+
+    // 1. Walk Chart
+    new Chart(document.getElementById('walkChart'), {
+        type: 'bar',
+        data: {
+            labels: ['Tag 1', 'Tag 2', 'Tag 3', 'Tag 4'],
+            datasets: [{
+                label: 'Kilometer',
+                data: [6.5, 10.5, 3.5, 7.5],
+                backgroundColor: ['#a3c4f3', '#d4a373', '#ccd5ae', '#faedcd'],
+                borderRadius: 8
+            }]
+        },
+        options: {
+            ...commonOptions,
+            plugins: { ...commonOptions.plugins, legend: { display: false } },
+            scales: {
+                y: { beginAtZero: true, grid: { display: false } },
+                x: { grid: { display: false } }
+            }
+        }
+    });
+
+    // 2. Time/Balance Chart
+    new Chart(document.getElementById('timeChart'), {
+        type: 'doughnut',
+        data: {
+            labels: ['Kultur/Sightseeing', 'Relaxing/Strand', 'Essen/Genuss', 'Wandern'],
+            datasets: [{
+                data: [30, 25, 25, 20],
+                backgroundColor: ['#d4a373', '#ccd5ae', '#a3c4f3', '#faedcd'],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            ...commonOptions,
+            cutout: '70%'
+        }
+    });
+
+    // 3. Food Ranking Chart
+    new Chart(document.getElementById('foodChart'), {
+        type: 'bar',
+        indexAxis: 'y',
+        data: {
+            labels: ['Bougatsa (Bantis)', 'Soutzoukakia (Tsinari)', 'Seafood (Milos)', 'Meze (Full tou Meze)'],
+            datasets: [{
+                label: 'Authentizitäts-Score',
+                data: [98, 95, 92, 88],
+                backgroundColor: '#ccd5ae',
+                borderRadius: 5
+            }]
+        },
+        options: {
+            ...commonOptions,
+            plugins: { 
+                ...commonOptions.plugins, 
+                legend: { display: false },
+                tooltip: { backgroundColor: '#333d29' }
+            },
+            scales: {
+                x: { max: 100, display: false },
+                y: { ticks: { color: '#ffffff', font: { size: 11 } }, grid: { display: false } }
+            }
+        }
+    });
+</script>
+
+</body>
+</html>
