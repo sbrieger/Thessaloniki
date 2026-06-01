@@ -1,340 +1,200 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Thessaloniki Explorer Dashboard</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Playfair+Display:ital,wght@0,700;1,700&display=swap');
-        
-        :root {
-            --color-bg: #fdfaf6;
-            --color-accent: #d4a373;
-            --color-secondary: #ccd5ae;
-            --color-text: #333d29;
-            --color-blue: #a3c4f3;
-        }
-
-        body { 
-            font-family: 'Montserrat', sans-serif; 
-            background-color: var(--color-bg); 
-            color: var(--color-text);
-            scroll-behavior: smooth;
-        }
-
-        h1, h2, h3 { font-family: 'Playfair Display', serif; }
-
-        .chart-container { 
-            position: relative; 
-            width: 100%; 
-            max-width: 650px; 
-            margin-left: auto; 
-            margin-right: auto; 
-            height: 300px; 
-            max-height: 400px; 
-        }
-
-        .card {
-            background: white;
-            border-radius: 1.5rem;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
-            transition: all 0.3s ease;
-        }
-
-        .card:hover { transform: translateY(-8px); box-shadow: 0 20px 30px -10px rgba(0, 0, 0, 0.1); }
-
-        .step-active { background-color: var(--color-accent); color: white; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Thessaloniki zu Fuß · Reiseführer 4.–8. Juni 2026</title>
+<style>
+  :root{
+    --ink:#2b2b2b; --muted:#6b6b6b; --hint:#9a9a9a;
+    --teal:#0a4d68; --info-bg:#e6f1fb; --info-tx:#0c447c; --info-br:#378add;
+    --warn-bg:#fdf6ec; --warn-tx:#7a5a0b; --warn-br:#e0a800;
+    --ok-bg:#eef5f3; --ok-tx:#0f6e56; --ok-br:#1b7a5a;
+    --surface:#f4f2ec; --card:#ffffff; --line:#e2ddd2; --accent:#c84b31;
+  }
+  *{box-sizing:border-box;}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;
+    color:var(--ink); line-height:1.6; margin:0; background:#faf8f4;
+  }
+  .wrap{max-width:720px; margin:0 auto; padding:32px 20px 56px;}
+  h1{font-size:30px; font-weight:600; margin:0 0 6px; color:var(--teal); letter-spacing:-.4px;}
+  h2{font-size:20px; font-weight:600; margin:0;}
+  .kicker{color:var(--info-tx); font-size:13px; margin:0 0 4px; letter-spacing:.3px;}
+  .dates{color:var(--muted); font-size:14px; margin:0 0 14px;}
+  .head{border-bottom:2px solid var(--accent); padding-bottom:18px; margin-bottom:22px;}
+  .badges{display:flex; flex-wrap:wrap; gap:8px;}
+  .badge{background:var(--surface); font-size:12px; padding:4px 11px; border-radius:8px; color:var(--muted);}
+  .glance{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; margin-bottom:26px;}
+  .gcard{background:var(--surface); border-radius:8px; padding:12px;}
+  .gcard .d{font-size:12px; color:var(--hint); margin:0 0 2px;}
+  .gcard .t{font-size:14px; font-weight:600; margin:0;}
+  .dayhead{display:flex; align-items:center; gap:10px; margin:0 0 14px;}
+  .num{width:30px; height:30px; border-radius:50%; background:var(--info-bg); color:var(--info-tx);
+       display:flex; align-items:center; justify-content:center; font-weight:600; font-size:14px; flex:none;}
+  .timeline{border-left:2px solid var(--line); padding-left:16px; margin-bottom:30px;}
+  .item{margin-bottom:14px;}
+  .item p{margin:0;}
+  .item .lead{font-size:14px;}
+  .item .desc{font-size:14px; color:var(--muted);}
+  .time{color:var(--info-tx); font-weight:600;}
+  .note{border-radius:0; padding:9px 13px; font-size:13px; margin-bottom:12px;}
+  .note.warn{background:var(--warn-bg); border-left:3px solid var(--warn-br); color:var(--warn-tx);}
+  .note.ok{background:var(--ok-bg); border-left:3px solid var(--ok-br); color:var(--ok-tx);}
+  .boat{background:var(--info-bg); border-radius:8px; padding:13px 15px; margin-bottom:14px;}
+  .boat .ttl{margin:0 0 6px; font-size:14px; font-weight:600; color:var(--info-tx);}
+  .boat .bd{margin:0; font-size:14px; color:var(--info-tx);}
+  .cards{display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:20px;}
+  .rcard{background:var(--card); border:1px solid var(--line); border-radius:12px; padding:16px 18px;}
+  .rcard .n{margin:0 0 2px; font-size:15px; font-weight:600;}
+  .rcard .price{font-size:12px; color:var(--ok-tx); font-weight:600;}
+  .rcard .loc{margin:0 0 6px; font-size:12px; color:var(--hint);}
+  .rcard .ds{margin:0; font-size:13px; color:var(--muted);}
+  .logi{background:#eef3f6; border-radius:10px; padding:6px 14px; margin-bottom:18px;}
+  .logi .row{display:flex; gap:12px; padding:8px 0; border-bottom:1px solid var(--line); font-size:13.5px;}
+  .logi .row:last-child{border-bottom:none;}
+  .logi .k{flex:none; width:74px; color:var(--teal); font-weight:600;}
+  .logi .v{color:var(--ink);}
+  a.m{color:var(--teal); text-decoration:none; border-bottom:1px solid rgba(10,77,104,.35);}
+  a.m:hover{border-bottom-color:var(--teal);}
+  .leg{font-size:12.5px; color:var(--ok-tx); margin:3px 0 0; display:flex; gap:5px; align-items:flex-start;}
+  .leg::before{content:"↳"; flex:none;}
+  table.ref{width:100%; border-collapse:collapse; font-size:13px; margin-bottom:8px;}
+  table.ref th{background:var(--surface); text-align:left; padding:7px 9px; color:var(--teal); border:1px solid var(--line);}
+  table.ref td{padding:6px 9px; border:1px solid var(--line); vertical-align:middle;}
+  table.ref td.dist{color:var(--muted); white-space:nowrap;}
+  .foot{font-size:12px; color:var(--hint); margin-top:24px; border-top:1px solid var(--line); padding-top:14px;}
+  @media(prefers-color-scheme:dark){
+    body{background:#1c1c1a; color:#e6e3da;}
+    a.m{color:#5dcaa5; border-bottom-color:rgba(93,202,165,.4);}
+    .leg{color:#7fd3b4;}
+    table.ref th{background:#2a2a27; color:#5dcaa5; border-color:#3a3a35;}
+    table.ref td{border-color:#3a3a35;} table.ref td.dist{color:#a8a59c;}
+    .gcard,.badge{background:#2a2a27; color:#b9b6ad;}
+    .surface{background:#2a2a27;}
+    .rcard{background:#232320; border-color:#3a3a35;}
+    .timeline{border-color:#3a3a35;}
+    h1{color:#5dcaa5;} .num{background:#0c447c; color:#cfe4fb;}
+    .item .desc,.rcard .ds,.dates{color:#a8a59c;}
+    .boat{background:#10283f;} .boat .ttl,.boat .bd{color:#9ec8f4;}
+    .logi{background:#202a30;} .logi .row{border-color:#3a3a35;} .logi .k{color:#5dcaa5;} .logi .v{color:#e6e3da;}
+  }
+</style>
 </head>
-<body class="antialiased">
+<body>
+<div class="wrap">
 
-<!-- Chosen Palette: Sand & Sea (Warme Neutralkoloration mit mediterranen Akzenten) -->
-<!-- Application Structure Plan: 
-    Das Dashboard ist als strategisches Planungs-Tool konzipiert.
-    - Hero: Emotionaler Einstieg in das "Feeling" der Stadt.
-    - Interaktiver Tages-Navigator: Schneller Zugriff auf die Kern-Highlights.
-    - Belastungs-Matrix: Visualisierung von Laufleistung und Aktivitätstypen (Kultur vs. Relax).
-    - Deep-Dive Kulinarik: Gegenüberstellung von lokalen Schätzen und Touristenfallen.
-    Diese Struktur hilft dem Nutzer, die Reise nicht nur als Text, sondern als rhythmisches Erlebnis (Anstrengung/Erholung) zu begreifen.
--->
-<!-- Visualization & Content Choices: 
-    - Distanz-Check -> Bar Chart (Geh-Intensität pro Tag).
-    - Balance-Rad -> Doughnut Chart (Verteilung der Zeit).
-    - Kulinarik-Präferenz -> Bar Chart (Ranking der Spezialitäten).
-    - KEIN SVG verwendet. KEIN Mermaid JS verwendet. Alle Grafiken via Canvas/Chart.js.
--->
-
-<nav class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-100 py-4 px-6">
-    <div class="max-w-6xl mx-auto flex justify-between items-center">
-        <span class="text-2xl font-bold text-[#d4a373] italic">Thessaloniki '25</span>
-        <div class="hidden md:flex space-x-8 font-semibold text-xs uppercase tracking-widest">
-            <a href="#route" class="hover:text-[#d4a373] transition">Der Plan</a>
-            <a href="#metrics" class="hover:text-[#d4a373] transition">Metriken</a>
-            <a href="#secrets" class="hover:text-[#d4a373] transition">Secrets</a>
-            <a href="#culinary" class="hover:text-[#d4a373] transition">Genuss</a>
-        </div>
+  <div class="head">
+    <p class="kicker">Dein persönlicher Reiseführer</p>
+    <h1>Thessaloniki zu Fuß</h1>
+    <p class="dates">4. Juni (mittags) – 8. Juni (früh) 2026 · 3,5 Tage · ohne Auto</p>
+    <div class="badges">
+      <span class="badge">Sehenswürdigkeiten</span>
+      <span class="badge">Hidden Spots</span>
+      <span class="badge">Relax-Pausen</span>
+      <span class="badge">Wassertaxi-Strandtag</span>
+      <span class="badge">Lokale Küche</span>
     </div>
-</nav>
+  </div>
 
-<header class="py-24 px-6 text-center">
-    <div class="max-w-3xl mx-auto">
-        <h1 class="text-6xl md:text-8xl font-bold text-gray-800 mb-8 leading-tight">Vier Tage, <br><span class="text-[#d4a373]">Tausend Jahre.</span></h1>
-        <p class="text-xl text-gray-600 font-light leading-relaxed mb-10">
-            Vom Rauschen des Thermäischen Golfs bis zum Echo byzantinischer Mauern – euer interaktiver Leitfaden durch die verborgenen Gassen von Thessaloniki.
-        </p>
-        <div class="flex justify-center space-x-4">
-            <span class="bg-[#ccd5ae] text-white px-4 py-2 rounded-full text-xs font-bold uppercase">4. - 8. Juni</span>
-            <span class="bg-[#a3c4f3] text-white px-4 py-2 rounded-full text-xs font-bold uppercase">Zu Fuss & Per Boot</span>
-        </div>
+  <div class="glance">
+    <div class="gcard"><p class="d">Do · 4. Juni</p><p class="t">Ankommen &amp; Wasser</p></div>
+    <div class="gcard"><p class="d">Fr · 5. Juni</p><p class="t">Zentrum &amp; Märkte</p></div>
+    <div class="gcard"><p class="d">Sa · 6. Juni</p><p class="t">Strandtag per Boot</p></div>
+    <div class="gcard"><p class="d">So · 7. Juni</p><p class="t">Oberstadt Ano Poli</p></div>
+  </div>
+
+  <div class="logi">
+    <div class="row"><span class="k">Anreise</span><span class="v">Do 4. Juni · Aegean <strong>A3501</strong> MUC 09:50 → SKG <strong>12:50</strong></span></div>
+    <div class="row"><span class="k">Abreise</span><span class="v">Mo 8. Juni · Aegean <strong>A3500</strong> SKG <strong>07:45</strong> → MUC 08:55</span></div>
+    <div class="row"><span class="k">Hotel</span><span class="v"><strong>Antigon Urban Chic</strong> · Junior Suite Courtyard View · 4 Nächte, 2 Pers. · <strong>Frühstück inklusive</strong> · ~5 Min. zu Ladadika (Res. 60294964)</span></div>
+    <div class="row"><span class="k">Transfer</span><span class="v">Flughafen ↔ Hotel ~13 km: Taxi ~24 € / ~30 Min. oder Bus <strong>01X</strong> 1,80 € / ~40 Min.</span></div>
+  </div>
+
+  <div class="note warn"><strong>Orientierung in 10 Sekunden:</strong> Das Meer ist immer „unten" im Süden, die Oberstadt „oben" im Norden. Euer Hotel liegt mittendrin – fast alles ist zu Fuß erreichbar.</div>
+
+  <div class="dayhead"><span class="num">1</span><h2>Donnerstag · Ankommen &amp; ans Wasser</h2></div>
+  <div class="timeline">
+    <div class="item"><p class="lead"><span class="time">12:50</span> · Landung &amp; Transfer</p><p class="desc">Ankunft mit A3501 in <a class="m" target="_blank" href="https://www.google.com/maps/search/?api=1&amp;query=Thessaloniki%20Airport%20SKG">SKG</a>. Taxi (~24 €, 30 Min.) oder Bus 01X zum <a class="m" target="_blank" href="https://www.google.com/maps/search/?api=1&amp;query=Antigon%20Urban%20Chic%20Hotel%20Antigonidon%2015%20Thessaloniki">Antigon Urban Chic</a>.</p><p class="leg">Flughafen → Hotel ~13 km · Taxi ~30 Min. / Bus 01X ~40 Min.</p></div>
+    <div class="item"><p class="lead"><span class="time">ab 13:30</span> · Check-in &amp; erstes Schlendern</p><p class="desc"><a class="m" target="_blank" href="https://www.google.com/maps/search/?api=1&amp;query=Aristotelous%20Square%20Thessaloniki">Aristotelous-Platz</a>, erster Freddo Espresso, ein Koulouri vom Straßenstand.</p><p class="leg">Hotel → Aristotelous-Platz ~550 m · 7 Min.</p></div>
+    <div class="item"><p class="lead"><span class="time">17:00</span> · Promenade &amp; Wahrzeichen</p><p class="desc"><a class="m" target="_blank" href="https://www.google.com/maps/search/?api=1&amp;query=White%20Tower%20of%20Thessaloniki">Weißer Turm</a>, dann die Nea Paralia entlang mit ihren thematischen Gärten.</p><p class="leg">Aristotelous → Weißer Turm ~1,1 km · 14 Min. → <a class="m" target="_blank" href="https://www.google.com/maps/search/?api=1&amp;query=Umbrellas%20Zongolopoulos%20Thessaloniki">Umbrellas</a> ~1,6 km · 20 Min.</p></div>
+    <div class="note ok"><strong>Sunset:</strong> An der Regenschirm-Skulptur „Umbrellas" – der schönste Spot der Stadt.</div>
+    <div class="item"><p class="lead"><span class="time">~21:00</span> · Erstes Abendessen</p><p class="desc">Lokaler Einstieg bei Sempriko oder einem Tsipouradiko.</p></div>
+  </div>
+
+  <div class="dayhead"><span class="num">2</span><h2>Freitag · Römisches &amp; byzantinisches Zentrum</h2></div>
+  <div class="timeline">
+    <div class="item"><p class="lead"><span class="time">08:30</span> · Frühstück im Hotel</p><p class="desc">Im Antigon inklusive. Unterwegs optional eine warme Bougatsa bei <a class="m" target="_blank" href="https://www.google.com/maps/search/?api=1&amp;query=Bougatsa%20Bantis%20Thessaloniki">Bantis</a> als süßen Zwischenstopp.</p></div>
+    <div class="item"><p class="lead"><span class="time">09:30</span> · Agios Dimitrios &amp; Galerius-Viertel</p><p class="desc">Basilika <a class="m" target="_blank" href="https://www.google.com/maps/search/?api=1&amp;query=Church%20of%20Agios%20Dimitrios%20Thessaloniki">Agios Dimitrios</a> (größte Kirche Griechenlands, Krypta) ums Eck, dann <a class="m" target="_blank" href="https://www.google.com/maps/search/?api=1&amp;query=Rotunda%20of%20Galerius%20Thessaloniki">Rotunda</a> (UNESCO), <a class="m" target="_blank" href="https://www.google.com/maps/search/?api=1&amp;query=Arch%20of%20Galerius%20Thessaloniki">Galeriusbogen „Kamara"</a>, <a class="m" target="_blank" href="https://www.google.com/maps/search/?api=1&amp;query=Roman%20Forum%20Thessaloniki">Römische Agora</a>.</p><p class="leg">Hotel → Agios Dimitrios ~900 m · 11 Min. → Rotunda ~1,0 km · 12 Min. → Kamara ~3 Min. → Agora ~10 Min.</p></div>
+    <div class="item"><p class="lead"><span class="time">12:00</span> · Märkte &amp; Mittagspause</p><p class="desc"><a class="m" target="_blank" href="https://www.google.com/maps/search/?api=1&amp;query=Kapani%20Market%20Thessaloniki">Kapani</a>- &amp; <a class="m" target="_blank" href="https://www.google.com/maps/search/?api=1&amp;query=Modiano%20Market%20Thessaloniki">Modiano</a>-Markt, Meze bei <a class="m" target="_blank" href="https://www.google.com/maps/search/?api=1&amp;query=Stou%20Mitsou%20Kapani%20Thessaloniki">Stou Mitsou</a> mitten im Markt.</p><p class="leg">Agora → Kapani-Markt ~600 m · 7 Min. (Hotel ↔ Kapani nur ~3 Min.)</p></div>
+    <div class="note ok"><strong>Hidden Spots:</strong> <a class="m" target="_blank" href="https://www.google.com/maps/search/?api=1&amp;query=Bey%20Hamam%20Thessaloniki">Bey Hamam</a> (Bad von 1444) und die Backstein-Kirche <a class="m" target="_blank" href="https://www.google.com/maps/search/?api=1&amp;query=Panagia%20Chalkeon%20Thessaloniki">Panagia Chalkeon</a> – oft menschenleer.</div>
+    <div class="item"><p class="lead"><span class="time">15:00</span> · Relax-Pause</p><p class="desc">Langer Kaffee mit Golfblick (Omilos oder Navona).</p></div>
+    <div class="note ok"><strong>Versteckte Bar:</strong> Athenian Library Bar hinter unmarkierter Tür, oder Purovoku Project am Bezesteni.</div>
+  </div>
+
+  <div class="dayhead"><span class="num">3</span><h2>Samstag · Strandtag per Wassertaxi</h2></div>
+  <div class="timeline">
+    <div class="boat">
+      <p class="ttl">Karavaki / „Poseidon"-Wassertaxi</p>
+      <p class="bd">Einstieg am <a class="m" target="_blank" href="https://www.google.com/maps/search/?api=1&amp;query=White%20Tower%20Pier%20Thessaloniki">Pier neben dem Weißen Turm</a> (~09:45) oder am Hafen. Fahrzeit 45–60 Min. nach Peraia &amp; Neoi Epivates, ~10 € pro Richtung – mit Skyline-Blick vom Wasser.</p>
+      <p class="leg">Hotel → Pier am Weißen Turm ~1,6 km · 21 Min. (oder Taxi ~6 Min.)</p>
     </div>
-</header>
+    <div class="item"><p class="lead">Vor Ort</p><p class="desc">Lange Sandstrände, Tavernen an der Wasserkante, Mittagessen mit frischem Fisch.</p></div>
+    <div class="note warn">Boote pausieren in der Vorsaison nur dienstags – Samstag passt. Letzte Rückfahrt am Nachmittag nicht verpassen.</div>
+  </div>
 
-<main class="max-w-6xl mx-auto px-6 pb-32">
+  <div class="dayhead"><span class="num">4</span><h2>Sonntag · Ano Poli, die Oberstadt</h2></div>
+  <div class="timeline">
+    <div class="item"><p class="lead"><span class="time">09:30</span> · Hinauf in die Oberstadt</p><p class="desc">Gassen, die den Brand von 1917 überstanden. <a class="m" target="_blank" href="https://www.google.com/maps/search/?api=1&amp;query=Vlatadon%20Monastery%20Thessaloniki">Vlatadon-Kloster</a> mit Pfauen im Garten.</p><p class="leg">Hotel → Vlatadon-Kloster ~1,7 km · 21 Min. (bergauf – oder Taxi ~7 Min.)</p></div>
+    <div class="note ok"><strong>Versteckte Schätze:</strong> <a class="m" target="_blank" href="https://www.google.com/maps/search/?api=1&amp;query=Church%20Agios%20Nikolaos%20Orfanos%20Thessaloniki">Agios Nikolaos Orfanos</a> (Fresken, 14. Jh.) und das 5.-Jh.-Mosaik in <a class="m" target="_blank" href="https://www.google.com/maps/search/?api=1&amp;query=Hosios%20David%20Thessaloniki">Osios David</a>.</div>
+    <div class="item"><p class="lead"><span class="time">11:30</span> · Stadtmauern &amp; <a class="m" target="_blank" href="https://www.google.com/maps/search/?api=1&amp;query=Trigoniou%20Tower%20Thessaloniki">Trigonion-Turm</a></p><p class="desc">Beste Panoramaaussicht über Stadt und Golf, gratis.</p><p class="leg">Vlatadon → Orfanos ~200 m · 3 Min. → Osios David ~350 m · 4 Min. → Trigonion-Turm ~600 m · 7 Min.</p></div>
+    <div class="item"><p class="lead"><span class="time">13:30</span> · Mittagessen wie nebenan</p><p class="desc"><a class="m" target="_blank" href="https://www.google.com/maps/search/?api=1&amp;query=Ouzeri%20Tsinari%20Thessaloniki">Ouzeri Tsinari</a> – günstige Nachbarschaftstaverne, Teller zum Teilen.</p></div>
+    <div class="item"><p class="lead"><span class="time">Abend</span> · Abschiedsessen</p><p class="desc">Letztes Mahl im Zentrum, dann packen – Montag früh geht es los.</p></div>
+    <div class="note warn"><strong>Mo 8. Juni, Flug A3500 um 07:45:</strong> Spätestens 06:00 am Flughafen, also ~05:15 aus dem Hotel. Taxi am Vorabend vorbestellen (Nachttarif ~32 €), Früh-Checkout ankündigen.</div>
+  </div>
 
-    <!-- Section: Interaktiver Plan -->
-    <section id="route" class="mb-32">
-        <div class="text-center mb-16">
-            <h2 class="text-4xl font-bold mb-4">Eure Etappen</h2>
-            <p class="text-gray-500 italic">Klickt auf die Tage, um die Kern-Erlebnisse zu sehen.</p>
-        </div>
+  <h2 style="margin-bottom:6px;">Kulinarik – lokal statt touristisch</h2>
+  <p class="desc" style="margin:0 0 14px; color:var(--muted); font-size:14px;">Probieren: Bougatsa · Koulouri · Tsipouro · Mezedes · Meeresfrüchte · Freddo Espresso</p>
+  <div class="cards">
+    <div class="rcard"><p class="n"><a class="m" target="_blank" href="https://www.google.com/maps/search/?api=1&amp;query=Bougatsa%20Bantis%20Thessaloniki">Bougatsa Bantis</a> <span class="price">€</span></p><p class="loc">nahe Zentrum</p><p class="ds">Seit 1969, Rezept vom Großvater. Beste Bougatsa der Stadt – euer Frühstück.</p></div>
+    <div class="rcard"><p class="n"><a class="m" target="_blank" href="https://www.google.com/maps/search/?api=1&amp;query=Stou%20Mitsou%20Kapani%20Thessaloniki">Stou Mitsou</a> <span class="price">€€</span></p><p class="loc">im Kapani-Markt</p><p class="ds">Winziges Ouzeri im Markt, Meze aus dem großen Steinofen.</p></div>
+    <div class="rcard"><p class="n"><a class="m" target="_blank" href="https://www.google.com/maps/search/?api=1&amp;query=Sempriko%20Thessaloniki%20restaurant">Sempriko</a> <span class="price">€€</span></p><p class="loc">hinter dem Gerichtsgebäude</p><p class="ds">Beliebt bei Locals, kreative Meze aus ganz Griechenland.</p></div>
+    <div class="rcard"><p class="n"><a class="m" target="_blank" href="https://www.google.com/maps/search/?api=1&amp;query=Ouzeri%20Tsinari%20Thessaloniki">Ouzeri Tsinari</a> <span class="price">€</span></p><p class="loc">Ano Poli</p><p class="ds">Charmante, günstige Nachbarschaftstaverne in der Oberstadt.</p></div>
+    <div class="rcard"><p class="n"><a class="m" target="_blank" href="https://www.google.com/maps/search/?api=1&amp;query=Full%20tou%20Meze%20Katouni%20Thessaloniki">Full tou Meze</a> <span class="price">€€</span></p><p class="loc">Ladadika, Katouni 3</p><p class="ds">Authentische Meze, fast immer voll – früh kommen oder reservieren.</p></div>
+    <div class="rcard"><p class="n"><a class="m" target="_blank" href="https://www.google.com/maps/search/?api=1&amp;query=Kalamaria%20Marina%20Thessaloniki">Fischtavernen Kalamaria</a> <span class="price">€€–€€€</span></p><p class="loc">am Yachthafen</p><p class="ds">Seafood-Viertel der Einheimischen an Strand und Marina.</p></div>
+  </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            <div class="card p-8 border-l-8 border-[#a3c4f3]">
-                <span class="text-sm font-bold text-[#a3c4f3]">Mittwoch</span>
-                <h3 class="text-2xl font-bold mt-2 mb-4">Ankommen</h3>
-                <p class="text-sm text-gray-600 mb-6">Uferpromenade, Regenschirme & der erste Meze in Ladadika. Sanfter Start am Meer.</p>
-                <ul class="text-xs space-y-2 text-gray-500">
-                    <li>• Weißer Turm</li>
-                    <li>• Nea Paralia Walk</li>
-                    <li>• Ladadika Dining</li>
-                </ul>
-            </div>
-            <div class="card p-8 border-l-8 border-[#d4a373]">
-                <span class="text-sm font-bold text-[#d4a373]">Donnerstag</span>
-                <h3 class="text-2xl font-bold mt-2 mb-4">Die Höhe</h3>
-                <p class="text-sm text-gray-600 mb-6">Aufstieg in die Ano Poli. Byzantinische Mauern, Kloster Vlatadon & Pasha's Gardens.</p>
-                <ul class="text-xs space-y-2 text-gray-500">
-                    <li>• Heptapyrgion Festung</li>
-                    <li>• Tsinari Taverne</li>
-                    <li>• Rotunda & Triumphbogen</li>
-                </ul>
-            </div>
-            <div class="card p-8 border-l-8 border-[#ccd5ae]">
-                <span class="text-sm font-bold text-[#ccd5ae]">Freitag</span>
-                <h3 class="text-2xl font-bold mt-2 mb-4">Das Blau</h3>
-                <p class="text-sm text-gray-600 mb-6">Wassertaxi nach Peraia. Ein ganzer Tag Sand, Meeresfrüchte und Entspannung pur.</p>
-                <ul class="text-xs space-y-2 text-gray-500">
-                    <li>• Bootsfahrt (Konstantis)</li>
-                    <li>• Neoi Epivates Beach</li>
-                    <li>• Milos Seafood</li>
-                </ul>
-            </div>
-            <div class="card p-8 border-l-8 border-gray-200">
-                <span class="text-sm font-bold text-gray-400">Samstag</span>
-                <h3 class="text-2xl font-bold mt-2 mb-4">Die Seele</h3>
-                <p class="text-sm text-gray-600 mb-6">Märkte Kapani & Modiano. Jüdisches Erbe und der perfekte Abschieds-Rooftop.</p>
-                <ul class="text-xs space-y-2 text-gray-500">
-                    <li>• Bougatsa Bantis</li>
-                    <li>• Markttrubel</li>
-                    <li>• Sebriko Kooperative</li>
-                </ul>
-            </div>
-        </div>
-    </section>
+  <div class="note warn"><strong>Touristenfalle vermeiden:</strong> Ladadika ist schön für Bummel und Drinks, zum Essen aber touristisch. Faustregel: wo viele Griechen sitzen und keine Foto-Karte in fünf Sprachen hängt, esst ihr richtig. Zwei Personen mit Wein: meist 30–50 €.</div>
 
-    <!-- Section: Daten-Einblicke -->
-    <section id="metrics" class="mb-32 bg-white rounded-[3rem] p-12 shadow-sm border border-gray-50">
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
-            <div>
-                <h2 class="text-4xl font-bold mb-6">Geh-Intensität & Balance</h2>
-                <p class="text-gray-600 mb-8 leading-relaxed">
-                    Der Plan ist so strukturiert, dass sich Belastung und Erholung abwechseln. Tag 2 fordert eure Kondition, während Tag 3 zur vollständigen Regeneration dient.
-                </p>
-                <div class="space-y-6">
-                    <div class="p-4 bg-orange-50 rounded-xl border-l-4 border-orange-200">
-                        <p class="text-sm font-bold text-orange-800">Tipp für Tag 2:</p>
-                        <p class="text-xs text-orange-700">Wählt bequeme Sneaker mit Grip. Das Kopfsteinpflaster in der Oberstadt kann rutschig sein.</p>
-                    </div>
-                    <div class="p-4 bg-blue-50 rounded-xl border-l-4 border-blue-200">
-                        <p class="text-sm font-bold text-blue-800">Tipp für Tag 3:</p>
-                        <p class="text-xs text-blue-700">Das Boot legt pünktlich ab. Kauft Tickets direkt an Bord – Barzahlung bevorzugt.</p>
-                    </div>
-                </div>
-            </div>
-            <div class="space-y-12">
-                <div>
-                    <h4 class="text-center font-bold text-sm mb-4 uppercase tracking-widest">Laufleistung pro Tag (km)</h4>
-                    <div class="chart-container">
-                        <canvas id="walkChart"></canvas>
-                    </div>
-                </div>
-                <div>
-                    <h4 class="text-center font-bold text-sm mb-4 uppercase tracking-widest">Zeitverteilung (Gesamt)</h4>
-                    <div class="chart-container">
-                        <canvas id="timeChart"></canvas>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+  <h2 style="margin-bottom:6px;">Karten &amp; Wege – alle Orte auf einen Blick</h2>
+  <p class="desc" style="margin:0 0 14px; color:var(--muted); font-size:14px;">Distanzen &amp; Gehzeiten ab dem Antigon Urban Chic Hotel (Antigonidon 15). Tippt auf „öffnen", um den Ort in Google Maps zu starten.</p>
+  <table class="ref">
+    <thead><tr><th>Ort</th><th>Stadtteil</th><th>ab Hotel</th><th>Karte</th></tr></thead>
+    <tbody>
+      <tr><td>Aristotelous-Platz</td><td>Zentrum</td><td class="dist">550 m · 7 Min.</td><td><a class="m" target="_blank" href="https://www.google.com/maps/search/?api=1&amp;query=Aristotelous%20Square%20Thessaloniki">öffnen</a></td></tr>
+      <tr><td>Weißer Turm</td><td>Promenade</td><td class="dist">1,1 km · 14 Min.</td><td><a class="m" target="_blank" href="https://www.google.com/maps/search/?api=1&amp;query=White%20Tower%20of%20Thessaloniki">öffnen</a></td></tr>
+      <tr><td>Umbrellas (Sunset)</td><td>Nea Paralia</td><td class="dist">2,7 km · 34 Min.</td><td><a class="m" target="_blank" href="https://www.google.com/maps/search/?api=1&amp;query=Umbrellas%20Zongolopoulos%20Thessaloniki">öffnen</a></td></tr>
+      <tr><td>Agios Dimitrios</td><td>Zentrum</td><td class="dist">900 m · 11 Min.</td><td><a class="m" target="_blank" href="https://www.google.com/maps/search/?api=1&amp;query=Church%20of%20Agios%20Dimitrios%20Thessaloniki">öffnen</a></td></tr>
+      <tr><td>Rotunda</td><td>Galerius-Viertel</td><td class="dist">1,0 km · 12 Min.</td><td><a class="m" target="_blank" href="https://www.google.com/maps/search/?api=1&amp;query=Rotunda%20of%20Galerius%20Thessaloniki">öffnen</a></td></tr>
+      <tr><td>Galeriusbogen (Kamara)</td><td>Galerius-Viertel</td><td class="dist">1,1 km · 13 Min.</td><td><a class="m" target="_blank" href="https://www.google.com/maps/search/?api=1&amp;query=Arch%20of%20Galerius%20Thessaloniki">öffnen</a></td></tr>
+      <tr><td>Römische Agora</td><td>Zentrum</td><td class="dist">650 m · 8 Min.</td><td><a class="m" target="_blank" href="https://www.google.com/maps/search/?api=1&amp;query=Roman%20Forum%20Thessaloniki">öffnen</a></td></tr>
+      <tr><td>Kapani-Markt</td><td>Zentrum</td><td class="dist">300 m · 4 Min.</td><td><a class="m" target="_blank" href="https://www.google.com/maps/search/?api=1&amp;query=Kapani%20Market%20Thessaloniki">öffnen</a></td></tr>
+      <tr><td>Modiano-Markt</td><td>Zentrum</td><td class="dist">400 m · 5 Min.</td><td><a class="m" target="_blank" href="https://www.google.com/maps/search/?api=1&amp;query=Modiano%20Market%20Thessaloniki">öffnen</a></td></tr>
+      <tr><td>Bey Hamam</td><td>Zentrum</td><td class="dist">650 m · 8 Min.</td><td><a class="m" target="_blank" href="https://www.google.com/maps/search/?api=1&amp;query=Bey%20Hamam%20Thessaloniki">öffnen</a></td></tr>
+      <tr><td>Panagia Chalkeon</td><td>Zentrum</td><td class="dist">550 m · 7 Min.</td><td><a class="m" target="_blank" href="https://www.google.com/maps/search/?api=1&amp;query=Panagia%20Chalkeon%20Thessaloniki">öffnen</a></td></tr>
+      <tr><td>Ladadika</td><td>Hafenviertel</td><td class="dist">500 m · 6 Min.</td><td><a class="m" target="_blank" href="https://www.google.com/maps/search/?api=1&amp;query=Ladadika%20Thessaloniki">öffnen</a></td></tr>
+      <tr><td>Pier Wassertaxi</td><td>Weißer Turm</td><td class="dist">1,6 km · 21 Min.</td><td><a class="m" target="_blank" href="https://www.google.com/maps/search/?api=1&amp;query=White%20Tower%20Pier%20Thessaloniki">öffnen</a></td></tr>
+      <tr><td>Vlatadon-Kloster</td><td>Ano Poli</td><td class="dist">1,7 km · 21 Min.</td><td><a class="m" target="_blank" href="https://www.google.com/maps/search/?api=1&amp;query=Vlatadon%20Monastery%20Thessaloniki">öffnen</a></td></tr>
+      <tr><td>Agios Nikolaos Orfanos</td><td>Ano Poli</td><td class="dist">1,9 km · 24 Min.</td><td><a class="m" target="_blank" href="https://www.google.com/maps/search/?api=1&amp;query=Church%20Agios%20Nikolaos%20Orfanos%20Thessaloniki">öffnen</a></td></tr>
+      <tr><td>Osios David</td><td>Ano Poli</td><td class="dist">1,6 km · 20 Min.</td><td><a class="m" target="_blank" href="https://www.google.com/maps/search/?api=1&amp;query=Hosios%20David%20Thessaloniki">öffnen</a></td></tr>
+      <tr><td>Trigonion-Turm</td><td>Ano Poli</td><td class="dist">2,1 km · 26 Min.</td><td><a class="m" target="_blank" href="https://www.google.com/maps/search/?api=1&amp;query=Trigoniou%20Tower%20Thessaloniki">öffnen</a></td></tr>
+      <tr><td>Kalamaria (Marina)</td><td>Südosten</td><td class="dist">Bus/Metro ~15 Min.</td><td><a class="m" target="_blank" href="https://www.google.com/maps/search/?api=1&amp;query=Kalamaria%20Marina%20Thessaloniki">öffnen</a></td></tr>
+      <tr><td>Flughafen SKG</td><td>Südosten</td><td class="dist">13 km · Taxi ~30 Min.</td><td><a class="m" target="_blank" href="https://www.google.com/maps/search/?api=1&amp;query=Thessaloniki%20Airport%20SKG">öffnen</a></td></tr>
+    </tbody>
+  </table>
 
-    <!-- Section: Hidden Spots -->
-    <section id="secrets" class="mb-32">
-        <div class="flex flex-col items-center text-center mb-16">
-            <h2 class="text-4xl font-bold mb-4">Abseits der Pfade</h2>
-            <div class="h-1 w-20 bg-[#d4a373] mb-6"></div>
-        </div>
+  <p class="foot">Persönlicher Reiseführer · Öffnungszeiten und Bootsfahrpläne vor Ort kurz gegenprüfen. Kalí órexi &amp; kaló taxídi!</p>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
-            <div class="text-center px-4">
-                <div class="w-16 h-16 bg-[#ccd5ae]/20 rounded-full flex items-center justify-center mx-auto mb-6 text-2xl">🌿</div>
-                <h3 class="text-xl font-bold mb-3">Pasha's Gardens</h3>
-                <p class="text-sm text-gray-500 italic">"Die Ruinen der Stille. Ein Ort, an dem man das Treiben der Stadt unter sich vergisst."</p>
-            </div>
-            <div class="text-center px-4">
-                <div class="w-16 h-16 bg-[#a3c4f3]/20 rounded-full flex items-center justify-center mx-auto mb-6 text-2xl">⛪</div>
-                <h3 class="text-xl font-bold mb-3">Kloster Vlatadon</h3>
-                <p class="text-sm text-gray-500 italic">"Byzantinische Mystik und Pfaue, die durch den Garten spazieren. Ein Fenster in die Ewigkeit."</p>
-            </div>
-            <div class="text-center px-4">
-                <div class="w-16 h-16 bg-[#faedcd]/20 rounded-full flex items-center justify-center mx-auto mb-6 text-2xl">🏛️</div>
-                <h3 class="text-xl font-bold mb-3">Die Krypta</h3>
-                <p class="text-sm text-gray-500 italic">"Unter der Agios Dimitrios Kirche wartet ein Labyrinth der Geschichte auf eure Entdeckung."</p>
-            </div>
-        </div>
-    </section>
-
-    <!-- Section: Food Guide -->
-    <section id="culinary" class="mb-32">
-        <div class="bg-[#333d29] text-white rounded-[4rem] overflow-hidden">
-            <div class="grid grid-cols-1 lg:grid-cols-2">
-                <div class="p-16">
-                    <h2 class="text-4xl font-bold mb-8">Kulinarischer Kompass</h2>
-                    <p class="text-gray-300 mb-12">In Thessaloniki wird das Essen nicht nur konsumiert, es wird gefeiert. Hier sind eure strategischen Ankerpunkte.</p>
-                    
-                    <div class="chart-container">
-                        <canvas id="foodChart"></canvas>
-                    </div>
-                </div>
-                <div class="bg-white/5 p-16 flex flex-col justify-center border-l border-white/10">
-                    <h3 class="text-2xl font-bold mb-8 text-[#d4a373] italic">No-Go Area: Touristenfallen</h3>
-                    <ul class="space-y-8">
-                        <li class="flex items-start">
-                            <span class="text-red-400 mr-4 font-bold text-xl">✕</span>
-                            <div>
-                                <h4 class="font-bold">Die Uferpromenade (Nikis)</h4>
-                                <p class="text-xs text-gray-400">Toller Ausblick für einen Drink, aber meidet das Essen. Zu teuer für zu wenig Qualität.</p>
-                            </div>
-                        </li>
-                        <li class="flex items-start">
-                            <span class="text-red-400 mr-4 font-bold text-xl">✕</span>
-                            <div>
-                                <h4 class="font-bold">Aggressive Promoter</h4>
-                                <p class="text-xs text-gray-400">Wenn euch jemand in Ladadika auf der Straße anspricht: Ignorieren. Die besten Tavernen haben das nicht nötig.</p>
-                            </div>
-                        </li>
-                        <li class="flex items-start">
-                            <span class="text-red-400 mr-4 font-bold text-xl">✕</span>
-                            <div>
-                                <h4 class="font-bold">Frühstücksketten</h4>
-                                <p class="text-xs text-gray-400">Geht für eure Bougatsa nicht zu den großen Bäckereien am Aristoteles-Platz. Geht zu Bantis.</p>
-                            </div>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </section>
-
-</main>
-
-<footer class="bg-white py-20 px-6 border-t border-gray-100 text-center">
-    <p class="text-gray-400 text-sm mb-4 italic">„Thessaloniki ist keine Stadt, es ist ein Gefühl.“</p>
-    <p class="text-xs font-bold uppercase tracking-widest text-[#d4a373]">Kalo Taxidi – Gute Reise!</p>
-</footer>
-
-<script>
-    // Konfigurationen für Chart.js
-    const commonOptions = {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: {
-                display: true,
-                position: 'bottom',
-                labels: { boxWidth: 10, font: { family: 'Montserrat', size: 10 } }
-            }
-        }
-    };
-
-    // 1. Walk Chart
-    new Chart(document.getElementById('walkChart'), {
-        type: 'bar',
-        data: {
-            labels: ['Tag 1', 'Tag 2', 'Tag 3', 'Tag 4'],
-            datasets: [{
-                label: 'Kilometer',
-                data: [6.5, 10.5, 3.5, 7.5],
-                backgroundColor: ['#a3c4f3', '#d4a373', '#ccd5ae', '#faedcd'],
-                borderRadius: 8
-            }]
-        },
-        options: {
-            ...commonOptions,
-            plugins: { ...commonOptions.plugins, legend: { display: false } },
-            scales: {
-                y: { beginAtZero: true, grid: { display: false } },
-                x: { grid: { display: false } }
-            }
-        }
-    });
-
-    // 2. Time/Balance Chart
-    new Chart(document.getElementById('timeChart'), {
-        type: 'doughnut',
-        data: {
-            labels: ['Kultur/Sightseeing', 'Relaxing/Strand', 'Essen/Genuss', 'Wandern'],
-            datasets: [{
-                data: [30, 25, 25, 20],
-                backgroundColor: ['#d4a373', '#ccd5ae', '#a3c4f3', '#faedcd'],
-                borderWidth: 0
-            }]
-        },
-        options: {
-            ...commonOptions,
-            cutout: '70%'
-        }
-    });
-
-    // 3. Food Ranking Chart
-    new Chart(document.getElementById('foodChart'), {
-        type: 'bar',
-        indexAxis: 'y',
-        data: {
-            labels: ['Bougatsa (Bantis)', 'Soutzoukakia (Tsinari)', 'Seafood (Milos)', 'Meze (Full tou Meze)'],
-            datasets: [{
-                label: 'Authentizitäts-Score',
-                data: [98, 95, 92, 88],
-                backgroundColor: '#ccd5ae',
-                borderRadius: 5
-            }]
-        },
-        options: {
-            ...commonOptions,
-            plugins: { 
-                ...commonOptions.plugins, 
-                legend: { display: false },
-                tooltip: { backgroundColor: '#333d29' }
-            },
-            scales: {
-                x: { max: 100, display: false },
-                y: { ticks: { color: '#ffffff', font: { size: 11 } }, grid: { display: false } }
-            }
-        }
-    });
-</script>
-
+</div>
 </body>
 </html>
