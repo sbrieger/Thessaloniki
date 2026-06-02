@@ -55,6 +55,23 @@
   .logi .row:last-child{border-bottom:none;}
   .logi .k{flex:none; width:74px; color:var(--teal); font-weight:600;}
   .logi .v{color:var(--ink);}
+  .hero{border-radius:16px; overflow:hidden; margin-bottom:18px; line-height:0; box-shadow:0 6px 22px rgba(10,77,104,.16);}
+  .hero svg{width:100%; height:auto; display:block;}
+  .wx{margin-bottom:26px;}
+  .wx-grid{display:grid; grid-template-columns:1.4fr 1fr 1fr 1fr; gap:10px;}
+  .wx-card{background:var(--card); border:1px solid var(--line); border-radius:12px; padding:13px 14px;}
+  .wx-card.now{background:var(--info-bg); border-color:var(--info-br);}
+  .wx-day{font-size:12px; color:var(--hint); margin:0 0 4px; font-weight:600; letter-spacing:.2px;}
+  .wx-card.now .wx-day{color:var(--info-tx);}
+  .wx-ico{font-size:26px; line-height:1; margin:0 0 4px;}
+  .wx-temp{font-size:22px; font-weight:600; margin:0; color:var(--ink);}
+  .wx-card.now .wx-temp{font-size:30px; color:var(--info-tx);}
+  .wx-cond{font-size:12.5px; color:var(--muted); margin:2px 0 0;}
+  .wx-hi{font-size:14px; font-weight:600; margin:0;}
+  .wx-lo{font-size:13px; color:var(--hint); margin:0;}
+  .wx-meta{font-size:11.5px; color:var(--muted); margin:5px 0 0;}
+  .wx-note{font-size:11px; color:var(--hint); margin:8px 0 0;}
+  @media(max-width:540px){.wx-grid{grid-template-columns:1fr 1fr;}}
   a.m{color:var(--teal); text-decoration:none; border-bottom:1px solid rgba(10,77,104,.35);}
   a.m:hover{border-bottom-color:var(--teal);}
   .leg{font-size:12.5px; color:var(--ok-tx); margin:3px 0 0; display:flex; gap:5px; align-items:flex-start;}
@@ -66,6 +83,9 @@
   .foot{font-size:12px; color:var(--hint); margin-top:24px; border-top:1px solid var(--line); padding-top:14px;}
   @media(prefers-color-scheme:dark){
     body{background:#1c1c1a; color:#e6e3da;}
+    .wx-card{background:#232320; border-color:#3a3a35;}
+    .wx-card.now{background:#10283f; border-color:#1f4f7a;}
+    .wx-temp{color:#e6e3da;} .wx-card.now .wx-temp,.wx-card.now .wx-day{color:#9ec8f4;}
     a.m{color:#5dcaa5; border-bottom-color:rgba(93,202,165,.4);}
     .leg{color:#7fd3b4;}
     table.ref th{background:#2a2a27; color:#5dcaa5; border-color:#3a3a35;}
@@ -83,6 +103,73 @@
 </head>
 <body>
 <div class="wrap">
+
+  <div class="hero">
+    <svg viewBox="0 0 720 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Illustration der Uferpromenade von Thessaloniki mit dem Weißen Turm">
+      <defs>
+        <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#f6c89a"/><stop offset="0.45" stop-color="#f4a98f"/>
+          <stop offset="1" stop-color="#e98c8c"/>
+        </linearGradient>
+        <linearGradient id="sea" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#2f7da3"/><stop offset="1" stop-color="#0a4d68"/>
+        </linearGradient>
+        <linearGradient id="stone" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stop-color="#e9e0cf"/><stop offset="1" stop-color="#cdbfa3"/>
+        </linearGradient>
+      </defs>
+      <rect width="720" height="300" fill="url(#sky)"/>
+      <circle cx="565" cy="92" r="40" fill="#fde3b0" opacity="0.9"/>
+      <circle cx="565" cy="92" r="40" fill="#fff3d6" opacity="0.5"/>
+      <!-- Mt Olympus silhouette -->
+      <path d="M0 158 L90 120 L150 142 L230 108 L300 150 L360 132 L430 158 L430 175 L0 175 Z" fill="#b98f96" opacity="0.55"/>
+      <path d="M430 162 L520 128 L600 156 L680 130 L720 152 L720 175 L430 175 Z" fill="#a9818c" opacity="0.55"/>
+      <!-- city skyline behind -->
+      <g fill="#9a7f86" opacity="0.7">
+        <rect x="60" y="150" width="26" height="40"/><rect x="92" y="138" width="20" height="52"/>
+        <rect x="118" y="156" width="30" height="34"/><rect x="156" y="146" width="18" height="44"/>
+        <rect x="182" y="158" width="26" height="32"/><rect x="470" y="150" width="22" height="40"/>
+        <rect x="498" y="140" width="28" height="50"/><rect x="532" y="156" width="20" height="34"/>
+        <rect x="610" y="148" width="24" height="42"/><rect x="640" y="158" width="30" height="32"/>
+        <rect x="676" y="144" width="18" height="46"/>
+      </g>
+      <!-- sea -->
+      <rect x="0" y="190" width="720" height="110" fill="url(#sea)"/>
+      <g stroke="#bfe0ee" stroke-width="2" opacity="0.35">
+        <line x1="40" y1="214" x2="120" y2="214"/><line x1="200" y1="230" x2="300" y2="230"/>
+        <line x1="430" y1="220" x2="520" y2="220"/><line x1="560" y1="244" x2="660" y2="244"/>
+        <line x1="120" y1="262" x2="230" y2="262"/><line x1="470" y1="270" x2="580" y2="270"/>
+      </g>
+      <!-- promenade -->
+      <rect x="0" y="188" width="720" height="8" fill="#d8cbb0"/>
+      <!-- White Tower -->
+      <g>
+        <rect x="300" y="92" width="64" height="110" rx="4" fill="url(#stone)"/>
+        <rect x="300" y="92" width="64" height="110" rx="4" fill="none" stroke="#b6a585" stroke-width="1.5"/>
+        <!-- crenellations -->
+        <g fill="#d8ccb2">
+          <rect x="300" y="86" width="12" height="10"/><rect x="318" y="86" width="12" height="10"/>
+          <rect x="336" y="86" width="12" height="10"/><rect x="352" y="86" width="12" height="10"/>
+        </g>
+        <!-- upper turret -->
+        <rect x="318" y="58" width="28" height="34" rx="3" fill="url(#stone)" stroke="#b6a585" stroke-width="1.5"/>
+        <g fill="#d8ccb2"><rect x="318" y="53" width="8" height="8"/><rect x="330" y="53" width="8" height="8"/><rect x="342" y="53" width="6" height="8"/></g>
+        <!-- windows -->
+        <g fill="#7a6b50">
+          <rect x="312" y="112" width="8" height="14" rx="2"/><rect x="344" y="112" width="8" height="14" rx="2"/>
+          <rect x="328" y="150" width="9" height="18" rx="2"/>
+          <rect x="328" y="68" width="8" height="12" rx="2"/>
+        </g>
+      </g>
+    </svg>
+  </div>
+
+  <div class="wx" id="wx">
+    <div class="wx-grid">
+      <div class="wx-card now"><p class="wx-day">Thessaloniki</p><p class="wx-temp">…</p><p class="wx-cond">Wetter wird geladen</p></div>
+    </div>
+    <p class="wx-note" id="wx-note">Aktuelles Wetter wird beim Öffnen geladen (Quelle: open-meteo.com).</p>
+  </div>
 
   <div class="head">
     <p class="kicker">Dein persönlicher Reiseführer</p>
@@ -196,5 +283,50 @@
   <p class="foot">Persönlicher Reiseführer · Öffnungszeiten und Bootsfahrpläne vor Ort kurz gegenprüfen. Kalí órexi &amp; kaló taxídi!</p>
 
 </div>
+<script>
+(function(){
+  var WMO = {
+    0:["Klar","☀️"],1:["Überwiegend klar","🌤️"],2:["Teils bewölkt","⛅"],3:["Bedeckt","☁️"],
+    45:["Nebel","🌫️"],48:["Reifnebel","🌫️"],
+    51:["Leichter Niesel","🌦️"],53:["Niesel","🌦️"],55:["Starker Niesel","🌦️"],
+    56:["Gefr. Niesel","🌧️"],57:["Gefr. Niesel","🌧️"],
+    61:["Leichter Regen","🌧️"],63:["Regen","🌧️"],65:["Starker Regen","🌧️"],
+    66:["Gefr. Regen","🌧️"],67:["Gefr. Regen","🌧️"],
+    71:["Leichter Schnee","🌨️"],73:["Schnee","🌨️"],75:["Starker Schnee","🌨️"],77:["Schneegriesel","🌨️"],
+    80:["Schauer","🌦️"],81:["Schauer","🌦️"],82:["Starke Schauer","⛈️"],
+    85:["Schneeschauer","🌨️"],86:["Schneeschauer","🌨️"],
+    95:["Gewitter","⛈️"],96:["Gewitter, Hagel","⛈️"],99:["Gewitter, Hagel","⛈️"]
+  };
+  function desc(c){ return WMO[c] || ["—","🌡️"]; }
+  var DAYS=["So","Mo","Di","Mi","Do","Fr","Sa"];
+  var url="https://api.open-meteo.com/v1/forecast?latitude=40.64&longitude=22.94"
+    +"&current=temperature_2m,weather_code,wind_speed_10m,relative_humidity_2m"
+    +"&daily=weather_code,temperature_2m_max,temperature_2m_min"
+    +"&timezone=Europe/Athens&forecast_days=4";
+  fetch(url).then(function(r){return r.json();}).then(function(d){
+    var cur=d.current, dl=d.daily;
+    var cc=desc(cur.weather_code);
+    var html='<div class="wx-grid">';
+    html+='<div class="wx-card now"><p class="wx-day">Thessaloniki · jetzt</p>'
+      +'<p class="wx-ico">'+cc[1]+'</p>'
+      +'<p class="wx-temp">'+Math.round(cur.temperature_2m)+'°</p>'
+      +'<p class="wx-cond">'+cc[0]+'</p>'
+      +'<p class="wx-meta">💧 '+cur.relative_humidity_2m+'% · 💨 '+Math.round(cur.wind_speed_10m)+' km/h</p></div>';
+    for(var i=1;i<dl.time.length;i++){
+      var dt=new Date(dl.time[i]+"T12:00:00");
+      var dc=desc(dl.weather_code[i]);
+      html+='<div class="wx-card"><p class="wx-day">'+DAYS[dt.getDay()]+' '+dt.getDate()+'.'+(dt.getMonth()+1)+'.</p>'
+        +'<p class="wx-ico">'+dc[1]+'</p>'
+        +'<p class="wx-hi">'+Math.round(dl.temperature_2m_max[i])+'°</p>'
+        +'<p class="wx-lo">'+Math.round(dl.temperature_2m_min[i])+'°</p>'
+        +'<p class="wx-cond">'+dc[0]+'</p></div>';
+    }
+    html+='</div><p class="wx-note">Aktuelles Wetter &amp; 3-Tage-Vorschau · Quelle: open-meteo.com (lädt bei jedem Öffnen neu).</p>';
+    document.getElementById('wx').innerHTML=html;
+  }).catch(function(){
+    document.getElementById('wx-note').textContent="Wetter konnte nicht geladen werden – Internetverbindung prüfen und Seite neu laden.";
+  });
+})();
+</script>
 </body>
 </html>
