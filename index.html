@@ -70,7 +70,13 @@
   .wx-hi{font-size:14px; font-weight:600; margin:0;}
   .wx-lo{font-size:13px; color:var(--hint); margin:0;}
   .wx-meta{font-size:11.5px; color:var(--muted); margin:5px 0 0;}
+  .wx-alt{font-size:11.5px; color:var(--muted); margin:7px 0 0; padding-top:6px; border-top:1px dashed var(--line);}
+  .wx-alt b{color:var(--teal); font-weight:600;}
   .wx-note{font-size:11px; color:var(--hint); margin:8px 0 0;}
+  .wx-legend{display:flex; gap:16px; flex-wrap:wrap; font-size:11.5px; color:var(--muted); margin:9px 0 0;}
+  .wx-legend span{display:inline-flex; align-items:center; gap:5px;}
+  .wx-dot{width:9px; height:9px; border-radius:50%; flex:none;}
+  .wx-dot.om{background:var(--info-br);} .wx-dot.dwd{background:var(--accent);}
   @media(max-width:540px){.wx-grid{grid-template-columns:1fr 1fr;}}
   a.m{color:var(--teal); text-decoration:none; border-bottom:1px solid rgba(10,77,104,.35);}
   a.m:hover{border-bottom-color:var(--teal);}
@@ -168,7 +174,7 @@
     <div class="wx-grid">
       <div class="wx-card now"><p class="wx-day">Thessaloniki</p><p class="wx-temp">…</p><p class="wx-cond">Wetter wird geladen</p></div>
     </div>
-    <p class="wx-note" id="wx-note">Aktuelles Wetter wird beim Öffnen geladen (Quelle: open-meteo.com).</p>
+    <p class="wx-note" id="wx-note">Aktuelles Wetter wird beim Öffnen geladen (Quellen: Open-Meteo &amp; DWD/Bright Sky).</p>
   </div>
 
   <div class="head">
@@ -285,46 +291,83 @@
 </div>
 <script>
 (function(){
-  var WMO = {
-    0:["Klar","☀️"],1:["Überwiegend klar","🌤️"],2:["Teils bewölkt","⛅"],3:["Bedeckt","☁️"],
-    45:["Nebel","🌫️"],48:["Reifnebel","🌫️"],
-    51:["Leichter Niesel","🌦️"],53:["Niesel","🌦️"],55:["Starker Niesel","🌦️"],
-    56:["Gefr. Niesel","🌧️"],57:["Gefr. Niesel","🌧️"],
-    61:["Leichter Regen","🌧️"],63:["Regen","🌧️"],65:["Starker Regen","🌧️"],
-    66:["Gefr. Regen","🌧️"],67:["Gefr. Regen","🌧️"],
-    71:["Leichter Schnee","🌨️"],73:["Schnee","🌨️"],75:["Starker Schnee","🌨️"],77:["Schneegriesel","🌨️"],
-    80:["Schauer","🌦️"],81:["Schauer","🌦️"],82:["Starke Schauer","⛈️"],
-    85:["Schneeschauer","🌨️"],86:["Schneeschauer","🌨️"],
-    95:["Gewitter","⛈️"],96:["Gewitter, Hagel","⛈️"],99:["Gewitter, Hagel","⛈️"]
-  };
-  function desc(c){ return WMO[c] || ["—","🌡️"]; }
-  var DAYS=["So","Mo","Di","Mi","Do","Fr","Sa"];
-  var url="https://api.open-meteo.com/v1/forecast?latitude=40.64&longitude=22.94"
+  var LAT=40.64, LON=22.94, DAYS=["So","Mo","Di","Mi","Do","Fr","Sa"];
+  // ---- Open-Meteo WMO codes -> [Text, Emoji] ----
+  var WMO={0:["Klar","☀️"],1:["Überw. klar","🌤️"],2:["Teils bewölkt","⛅"],3:["Bedeckt","☁️"],
+    45:["Nebel","🌫️"],48:["Reifnebel","🌫️"],51:["Niesel","🌦️"],53:["Niesel","🌦️"],55:["Niesel","🌦️"],
+    56:["Gefr. Niesel","🌧️"],57:["Gefr. Niesel","🌧️"],61:["Leicht. Regen","🌧️"],63:["Regen","🌧️"],65:["Starkregen","🌧️"],
+    66:["Gefr. Regen","🌧️"],67:["Gefr. Regen","🌧️"],71:["Schnee","🌨️"],73:["Schnee","🌨️"],75:["Schnee","🌨️"],77:["Schneegriesel","🌨️"],
+    80:["Schauer","🌦️"],81:["Schauer","🌦️"],82:["Starke Schauer","⛈️"],85:["Schneeschauer","🌨️"],86:["Schneeschauer","🌨️"],
+    95:["Gewitter","⛈️"],96:["Gewitter","⛈️"],99:["Gewitter","⛈️"]};
+  function wmo(c){return WMO[c]||["—","🌡️"];}
+  // ---- Bright Sky icon -> [Text, Emoji] ----
+  var BS={"clear-day":["Klar","☀️"],"clear-night":["Klar","☀️"],"partly-cloudy-day":["Teils bewölkt","⛅"],
+    "partly-cloudy-night":["Teils bewölkt","⛅"],"cloudy":["Bewölkt","☁️"],"fog":["Nebel","🌫️"],"wind":["Windig","💨"],
+    "rain":["Regen","🌧️"],"sleet":["Schneeregen","🌧️"],"snow":["Schnee","🌨️"],"hail":["Hagel","⛈️"],"thunderstorm":["Gewitter","⛈️"]};
+  function bs(ic){return BS[ic]||["—","🌡️"];}
+
+  function pad(n){return (n<10?"0":"")+n;}
+  var now=new Date();
+  var d0=now.getFullYear()+"-"+pad(now.getMonth()+1)+"-"+pad(now.getDate());
+  var end=new Date(now.getTime()+3*864e5);
+  var d3=end.getFullYear()+"-"+pad(end.getMonth()+1)+"-"+pad(end.getDate());
+
+  var omUrl="https://api.open-meteo.com/v1/forecast?latitude="+LAT+"&longitude="+LON
     +"&current=temperature_2m,weather_code,wind_speed_10m,relative_humidity_2m"
-    +"&daily=weather_code,temperature_2m_max,temperature_2m_min"
-    +"&timezone=Europe/Athens&forecast_days=4";
-  fetch(url).then(function(r){return r.json();}).then(function(d){
-    var cur=d.current, dl=d.daily;
-    var cc=desc(cur.weather_code);
+    +"&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=Europe/Athens&forecast_days=4";
+  var bsUrl="https://api.brightsky.dev/weather?lat="+LAT+"&lon="+LON+"&date="+d0+"&last_date="+d3+"&tz=Europe/Athens";
+
+  function getJSON(u){return fetch(u).then(function(r){if(!r.ok)throw 0;return r.json();});}
+
+  function buildBright(data){
+    // aggregate hourly -> per day min/max + condition near 13:00; current = hour closest to now
+    var byDay={}, curBest=null, curDiff=1e15, nowTs=Date.now();
+    (data.weather||[]).forEach(function(w){
+      if(w.temperature==null) return;
+      var day=w.timestamp.slice(0,10), hr=parseInt(w.timestamp.slice(11,13),10);
+      if(!byDay[day]) byDay[day]={min:1e9,max:-1e9,icon:null,idiff:1e9};
+      if(w.temperature<byDay[day].min) byDay[day].min=w.temperature;
+      if(w.temperature>byDay[day].max) byDay[day].max=w.temperature;
+      var nd=Math.abs(hr-13); if(nd<byDay[day].idiff){byDay[day].idiff=nd; byDay[day].icon=w.icon||w.condition;}
+      var td=Math.abs(new Date(w.timestamp).getTime()-nowTs);
+      if(td<curDiff){curDiff=td; curBest=w;}
+    });
+    return {byDay:byDay, current:curBest};
+  }
+
+  Promise.allSettled([getJSON(omUrl), getJSON(bsUrl)]).then(function(res){
+    var om = res[0].status==="fulfilled" ? res[0].value : null;
+    var brraw = res[1].status==="fulfilled" ? res[1].value : null;
+    if(!om){ document.getElementById('wx-note').textContent="Wetter konnte nicht geladen werden – Internetverbindung prüfen und Seite neu laden."; return; }
+    var br = brraw ? buildBright(brraw) : null;
+
+    var cur=om.current, dl=om.daily, cc=wmo(cur.weather_code);
     var html='<div class="wx-grid">';
+    // current card
+    var altNow="";
+    if(br && br.current){ var bc=bs(br.current.icon); altNow='<p class="wx-alt"><b>DWD:</b> '+Math.round(br.current.temperature)+'° · '+bc[0]+'</p>'; }
     html+='<div class="wx-card now"><p class="wx-day">Thessaloniki · jetzt</p>'
-      +'<p class="wx-ico">'+cc[1]+'</p>'
-      +'<p class="wx-temp">'+Math.round(cur.temperature_2m)+'°</p>'
+      +'<p class="wx-ico">'+cc[1]+'</p><p class="wx-temp">'+Math.round(cur.temperature_2m)+'°</p>'
       +'<p class="wx-cond">'+cc[0]+'</p>'
-      +'<p class="wx-meta">💧 '+cur.relative_humidity_2m+'% · 💨 '+Math.round(cur.wind_speed_10m)+' km/h</p></div>';
+      +'<p class="wx-meta">💧 '+cur.relative_humidity_2m+'% · 💨 '+Math.round(cur.wind_speed_10m)+' km/h</p>'+altNow+'</div>';
+    // day cards
     for(var i=1;i<dl.time.length;i++){
-      var dt=new Date(dl.time[i]+"T12:00:00");
-      var dc=desc(dl.weather_code[i]);
+      var key=dl.time[i], dt=new Date(key+"T12:00:00"), dc=wmo(dl.weather_code[i]);
+      var altDay="";
+      if(br && br.byDay[key] && br.byDay[key].max>-1e8){
+        var bd=br.byDay[key]; var bi=bs(bd.icon);
+        altDay='<p class="wx-alt"><b>DWD:</b> '+Math.round(bd.max)+'°/'+Math.round(bd.min)+'° '+bi[1]+'</p>';
+      } else if(br){ altDay='<p class="wx-alt"><b>DWD:</b> –</p>'; }
       html+='<div class="wx-card"><p class="wx-day">'+DAYS[dt.getDay()]+' '+dt.getDate()+'.'+(dt.getMonth()+1)+'.</p>'
-        +'<p class="wx-ico">'+dc[1]+'</p>'
-        +'<p class="wx-hi">'+Math.round(dl.temperature_2m_max[i])+'°</p>'
-        +'<p class="wx-lo">'+Math.round(dl.temperature_2m_min[i])+'°</p>'
-        +'<p class="wx-cond">'+dc[0]+'</p></div>';
+        +'<p class="wx-ico">'+dc[1]+'</p><p class="wx-hi">'+Math.round(dl.temperature_2m_max[i])+'°</p>'
+        +'<p class="wx-lo">'+Math.round(dl.temperature_2m_min[i])+'°</p><p class="wx-cond">'+dc[0]+'</p>'+altDay+'</div>';
     }
-    html+='</div><p class="wx-note">Aktuelles Wetter &amp; 3-Tage-Vorschau · Quelle: open-meteo.com (lädt bei jedem Öffnen neu).</p>';
+    html+='</div>';
+    html+='<div class="wx-legend"><span><span class="wx-dot om"></span>Open-Meteo (global, groß)</span>'
+      +'<span><span class="wx-dot dwd"></span>DWD / Bright Sky (Vergleich)</span></div>';
+    var dwdMsg = br ? "" : " (DWD-Daten gerade nicht verfügbar)";
+    html+='<p class="wx-note">Aktuelles Wetter &amp; 3-Tage-Vorschau aus zwei freien Quellen · lädt bei jedem Öffnen neu'+dwdMsg+'.</p>';
     document.getElementById('wx').innerHTML=html;
-  }).catch(function(){
-    document.getElementById('wx-note').textContent="Wetter konnte nicht geladen werden – Internetverbindung prüfen und Seite neu laden.";
   });
 })();
 </script>
